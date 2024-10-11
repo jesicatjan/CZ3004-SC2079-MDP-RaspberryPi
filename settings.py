@@ -1,5 +1,5 @@
 # STM32 BOARD SERIAL CONNECTION
-SERIAL_PORT = "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0002-if00-port0"  # stm32
+SERIAL_PORT = '/dev/ttyUSB0'  # Change this if the STM board is connected on another port
 BAUD_RATE = 115200
 
 # API DETAILS

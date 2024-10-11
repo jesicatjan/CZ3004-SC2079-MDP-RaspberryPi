@@ -144,7 +144,6 @@ class AndroidLink(Link):
             bluetooth.advertise_service(self.server_sock, "MDP-Group31-RPi", service_id=uuid, service_classes=[
                                         uuid, bluetooth.SERIAL_PORT_CLASS], profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
-
             print("here")
             print(client_info)
             self.logger.info(
