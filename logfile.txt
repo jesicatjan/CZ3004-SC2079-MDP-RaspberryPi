@@ -1,0 +1,2 @@
+2024-10-11 11:13:55,372 :: INFO :: Bluetooth connection started
+2024-10-11 11:13:55,413 :: ERROR :: Error in Bluetooth link connection: name 'bluetooth' is not defined

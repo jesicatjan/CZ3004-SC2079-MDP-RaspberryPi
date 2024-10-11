@@ -119,6 +119,12 @@ class AndroidLink(Link):
         """
         Connect to Andriod by Bluetooth
         """
+
+        MAC_ADDRESS = 'AA:AA:AA:AA:AA:AA'  # Raspberry Pi's MAC address
+        TABLET_BLUETOOTH = '90:EE:C7:E7:D6:40'  # Android tablet Bluetooth MAC address
+        PORT_NUMBER = 1
+        READ_BUFFER_SIZE = 5096
+
         self.logger.info("Bluetooth connection started")
         try:
             # Set RPi to be discoverable in order for service to be advertisable
@@ -126,17 +132,21 @@ class AndroidLink(Link):
 
             # Initialize server socket
             self.server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-            self.server_sock.bind(("", bluetooth.PORT_ANY))
+            self.server_sock.bind((MAC_ADDRESS, PORT_NUMBER))
             self.server_sock.listen(1)
+            print(f"[BT] Listening on {self.MAC_ADDRESS}:{self.PORT_NUMBER}...")
 
             # Parameters
             port = self.server_sock.getsockname()[1]
             uuid = '94f39d29-7d6d-437d-973b-fba39e49d4ee'
 
             # Advertise
-            bluetooth.advertise_service(self.server_sock, "MDP-Group2-RPi", service_id=uuid, service_classes=[
+            bluetooth.advertise_service(self.server_sock, "MDP-Group31-RPi", service_id=uuid, service_classes=[
                                         uuid, bluetooth.SERIAL_PORT_CLASS], profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
+
+            print("here")
+            print(client_info)
             self.logger.info(
                 f"Awaiting Bluetooth connection on RFCOMM CHANNEL {port}")
             self.client_sock, client_info = self.server_sock.accept()
