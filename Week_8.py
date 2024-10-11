@@ -10,7 +10,7 @@ from communication.android import AndroidLink, AndroidMessage
 from communication.stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
-from settings import API_IP, API_PORT
+from settings import ALGO_API_IP, ALGO_API_PORT
 
 
 class PiAction:
@@ -364,7 +364,7 @@ class RaspberryPi:
         self.logger.info(f"Capturing image for obstacle id: {obstacle_id}")
         self.android_queue.put(AndroidMessage(
             "info", f"Capturing image for obstacle id: {obstacle_id}"))
-        url = f"http://{API_IP}:{API_PORT}/image"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/image"
         filename = f"{int(time.time())}_{obstacle_id}_{signal}.jpg"
 
         con_file = "PiLCConfig9.txt"
@@ -501,7 +501,7 @@ class RaspberryPi:
         self.logger.info(f"data: {data}")
         body = {**data, "big_turn": "0", "robot_x": robot_x,
                 "robot_y": robot_y, "robot_dir": robot_dir, "retrying": retrying}
-        url = f"http://{API_IP}:{API_PORT}/path"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/path"
         response = requests.post(url, json=body)
 
         # Error encountered at the server, return early
@@ -534,7 +534,7 @@ class RaspberryPi:
 
     def request_stitch(self):
         """Sends a stitch request to the image recognition API to stitch the different images together"""
-        url = f"http://{API_IP}:{API_PORT}/stitch"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/stitch"
         response = requests.get(url)
 
         # If error, then log, and send error to Android
@@ -563,7 +563,7 @@ class RaspberryPi:
             bool: True if running, False if not.
         """
         # Check image recognition API
-        url = f"http://{API_IP}:{API_PORT}/status"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/status"
         try:
             response = requests.get(url, timeout=1)
             if response.status_code == 200:

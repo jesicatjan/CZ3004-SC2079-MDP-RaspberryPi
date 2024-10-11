@@ -10,7 +10,7 @@ from communication.android import AndroidLink, AndroidMessage
 from communication.stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
-from settings import API_IP, API_PORT
+from settings import ALGO_API_IP, ALGO_API_PORT
 
 
 class PiAction:
@@ -318,7 +318,7 @@ class RaspberryPi:
         
         self.logger.info(f"Capturing image for obstacle id: {obstacle_id}")
         signal = "C"
-        url = f"http://{API_IP}:{API_PORT}/image"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/image"
         filename = f"{int(time.time())}_{obstacle_id}_{signal}.jpg"
         
         
@@ -423,7 +423,7 @@ class RaspberryPi:
         return ans
 
     def request_stitch(self):
-        url = f"http://{API_IP}:{API_PORT}/stitch"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/stitch"
         response = requests.get(url)
         if response.status_code != 200:
             self.logger.error("Something went wrong when requesting stitch from the API.")
@@ -435,7 +435,7 @@ class RaspberryPi:
             self.command_queue.get()
 
     def check_api(self) -> bool:
-        url = f"http://{API_IP}:{API_PORT}/status"
+        url = f"http://{ALGO_API_IP}:{ALGO_API_PORT}/status"
         try:
             response = requests.get(url, timeout=1)
             if response.status_code == 200:

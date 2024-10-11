@@ -1,7 +1,7 @@
 from typing import Optional
 import serial
 from communication.link import Link
-from settings import SERIAL_PORT, BAUD_RATE
+from settings import STM_SERIAL_PORT, STM_BAUD_RATE
 
 
 class STMLink(Link):
@@ -41,7 +41,7 @@ class STMLink(Link):
 
     def connect(self):
         """Connect to STM32 using serial UART connection, given the serial port and the baud rate"""
-        self.serial_link = serial.Serial(SERIAL_PORT, BAUD_RATE)
+        self.serial_link = serial.Serial(STM_SERIAL_PORT, STM_BAUD_RATE)
         self.logger.info("Connected to STM32")
 
     def disconnect(self):
