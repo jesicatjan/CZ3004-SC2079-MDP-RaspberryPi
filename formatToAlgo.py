@@ -1,4 +1,4 @@
-# initialPositions = "OBS,1,5,4,NORTH\nOBS,2,5,4,NORTH\nOBS,3,5,4,NORTH\nOBS,4,5,4,NORTH\nOBS,5,5,4,NORTH"
+# initialPositions = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
 
 """
 {
@@ -12,7 +12,7 @@
 
 def formatToAlgo(initialPositions):
     obstacles = []
-    lines = initialPositions.split("\n")
+    lines = initialPositions.split("|")
     
     for line in lines:
         if line.startswith("OBS"):
@@ -48,6 +48,6 @@ def formatToAlgo(initialPositions):
 
 # # Example usage:
 
-# message = "OBS,1,5,4,NORTH\nOBS,2,5,4,NORTH\nOBS,3,5,4,NORTH\nOBS,4,5,4,NORTH\nOBS,5,5,4,NORTH"
-# formatted_result = formatToAlgo(message)
-# print(formatted_result)
+message = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
+formatted_result = formatToAlgo(message)
+print(formatted_result)
