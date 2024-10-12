@@ -11,7 +11,7 @@ from communication.stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
 from settings import ALGO_API_IP, ALGO_API_PORT
-
+import formatToAlgo    
 
 class PiAction:
     """
@@ -290,10 +290,21 @@ class RaspberryPi:
             # Acquire lock first (needed for both moving, and snapping pictures)
             self.movement_lock.acquire()
 
-            # STM32 Commands - Send straight to STM32
-            stm32_prefixes = ("FS", "BS", "FW", "BW", "FL", "FR", "BL",
-                              "BR", "TL", "TR", "A", "C", "DT", "STOP", "ZZ", "RS")
-            if command.startswith(stm32_prefixes):
+            # # STM32 Commands - Send straight to STM32
+            # stm32_prefixes = ("FS", "BS", "FW", "BW", "FL", "FR", "BL",
+            #                   "BR", "TL", "TR", "A", "C", "DT", "STOP", "ZZ", "RS")
+
+            # if command.startswith(stm32_prefixes):
+            
+            command = formatToSTM(command)
+
+            if command.startswith("SNAP"):
+                
+
+
+
+            
+            else:
                 self.stm_link.send(command)
                 self.logger.debug(f"Sending to STM32: {command}")
 
@@ -524,6 +535,8 @@ class RaspberryPi:
         self.clear_queues()
         for c in commands:
             self.command_queue.put(c)
+
+        # dont know if needed
         for p in path[1:]:  # ignore first element as it is the starting position of the robot
             self.path_queue.put(p)
 
