@@ -11,7 +11,7 @@ from communication.stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
 from settings import ALGO_API_IP, ALGO_API_PORT
-import formatToAlgo    
+import formatToSTM
 
 class PiAction:
     """
@@ -290,28 +290,17 @@ class RaspberryPi:
             # Acquire lock first (needed for both moving, and snapping pictures)
             self.movement_lock.acquire()
 
-            # # STM32 Commands - Send straight to STM32
-            # stm32_prefixes = ("FS", "BS", "FW", "BW", "FL", "FR", "BL",
-            #                   "BR", "TL", "TR", "A", "C", "DT", "STOP", "ZZ", "RS")
-
-            # if command.startswith(stm32_prefixes):
-            
             command = formatToSTM(command)
+            stm32_prefixes = ("f ", "b ", "fr ", "fl ", "br ", "bl ")
 
-            if command.startswith("SNAP"):
-                
-
-
-
-            
-            else:
+            # STM32 Commands - Send straight to STM32
+            if command.startswith(stm32_prefixes):
                 self.stm_link.send(command)
                 self.logger.debug(f"Sending to STM32: {command}")
 
-            # Snap command
+            # SNAP commands
             elif command.startswith("SNAP"):
                 obstacle_id_with_signal = command.replace("SNAP", "")
-
                 self.rpi_action_queue.put(
                     PiAction(cat="snap", value=obstacle_id_with_signal))
 
