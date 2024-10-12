@@ -182,7 +182,7 @@ class RaspberryPi:
 
             if waiting_for_initial_positions:
                 initialPositions = msg_str
-                print(f"Stored initialPositions: {initialPositions}")
+                print(f"initialPositions from android: {initialPositions}")
 
                 # Format and POST request to the algorithm server
                 formatted_algo = formatToAlgo(initialPositions)
