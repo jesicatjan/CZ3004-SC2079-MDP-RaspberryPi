@@ -311,18 +311,23 @@ class RaspberryPi:
         while True:
             # Retrieve next movement command
             command: str = self.command_queue.get()
+            print("current command from queue: ", command)
             self.logger.debug("wait for unpause")
             # Wait for unpause event to be true [Main Trigger]
             try:
+                print("in try block")
                 self.logger.debug("wait for retrylock")
                 self.retrylock.acquire()
                 self.retrylock.release()
             except:
+                print("in try except")
                 self.logger.debug("wait for unpause")
                 self.unpause.wait()
             self.logger.debug("wait for movelock")
+            
             # Acquire lock first (needed for both moving, and snapping pictures)
             self.movement_lock.acquire()
+            print("movement_lock acquired")
 
 
             print("Command to format to STM: ", command)
