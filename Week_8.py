@@ -196,6 +196,10 @@ class RaspberryPi:
                 initialPositions = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
                 print(f"initialPositions from android: {initialPositions}")
 
+                # force unpause
+                print("testing unpause 1")
+                self.unpause.set()
+
                 # Format and POST request to the algorithm server
                 formatted_algo = formatToAlgo.formatToAlgo(initialPositions)
                 # waiting_for_initial_positions = False
