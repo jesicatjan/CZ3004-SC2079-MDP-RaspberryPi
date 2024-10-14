@@ -174,7 +174,6 @@ class RaspberryPi:
 
         while True:
             msg_str: Optional[str] = None
-
             print("Message from Android: ", msg_str)
 
             # test
@@ -193,7 +192,7 @@ class RaspberryPi:
 
             if waiting_for_initial_positions:
                 # initialPositions = msg_str
-                initialPositions = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
+                initialPositions = "OBS,1,10,4,NORTH|OBS,2,5,4,NORTH|OBS,3,7,3,NORTH|OBS,4,3,6,NORTH|OBS,5,1,10,NORTH"
                 print(f"initialPositions from android: {initialPositions}")
 
                 # force unpause
@@ -245,8 +244,8 @@ class RaspberryPi:
                 else:
                     self.logger.warning(
                         "The command queue is empty, please set obstacles.")
-                    # self.android_queue.put(AndroidMessage(
-                    #     "error", "Command queue is empty, did you set obstacles?"))
+                    self.android_queue.put(AndroidMessage(
+                        "error", "Command queue is empty, did you set obstacles?"))
                     
                 waiting_for_initial_positions = False
 
@@ -318,15 +317,15 @@ class RaspberryPi:
             print("current command from queue: ", command)
             self.logger.debug("wait for unpause")
             # Wait for unpause event to be true [Main Trigger]
-            try:
-                print("in try block")
-                self.logger.debug("wait for retrylock")
-                self.retrylock.acquire()
-                self.retrylock.release()
-            except:
-                print("in try except")
-                self.logger.debug("wait for unpause")
-                self.unpause.wait()
+            # try:
+            #     print("in try block")
+            #     self.logger.debug("wait for retrylock")
+            #     self.retrylock.acquire()
+            #     self.retrylock.release()
+            # except:
+            #     print("in try except")
+            #     self.logger.debug("wait for unpause")
+            #     self.unpause.wait()
             self.logger.debug("wait for movelock")
             
             # Acquire lock first (needed for both moving, and snapping pictures)
@@ -344,7 +343,7 @@ class RaspberryPi:
             if command.startswith(stm32_prefixes):
                 print("Command sending to STM32: ", command)
                 self.stm_link.send(command)
-                self.logger.debug(f"Sending to STM32: {command}")
+                self.logger.debug(f"Send to STM32 already: {command}")
 
             # SNAP commands
             elif command.startswith("SNAP"):
