@@ -48,6 +48,6 @@ def formatToAlgo(initialPositions):
 
 # # Example usage:
 
-message = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
-formatted_result = formatToAlgo(message)
-print(formatted_result)
+# message = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
+# formatted_result = formatToAlgo(message)
+# print(formatted_result)
