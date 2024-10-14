@@ -6,8 +6,8 @@ from multiprocessing import Process, Manager
 from typing import Optional
 import os
 import requests
-from android import AndroidLink, AndroidMessage
-from stm32 import STMLink
+from communication.android import AndroidLink, AndroidMessage
+from communication.stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
 from settings import ALGO_API_IP, ALGO_API_PORT
@@ -170,8 +170,18 @@ class RaspberryPi:
         waiting_for_initial_positions = False
         initialPositions = None
 
+        test = True
+
         while True:
             msg_str: Optional[str] = None
+
+            print("Message from Android: ", msg_str)
+
+            # test
+            if test == True:
+                waiting_for_initial_positions = True
+                test = False
+
             try:
                 msg_str = self.android_link.recv()
             except OSError:
@@ -182,12 +192,13 @@ class RaspberryPi:
                 continue
 
             if waiting_for_initial_positions:
-                initialPositions = msg_str
+                # initialPositions = msg_str
+                initialPositions = "OBS,1,5,4,NORTH|OBS,2,5,4,NORTH|OBS,3,5,4,NORTH|OBS,4,5,4,NORTH|OBS,5,5,4,NORTH"
                 print(f"initialPositions from android: {initialPositions}")
 
                 # Format and POST request to the algorithm server
-                formatted_algo = formatToAlgo(initialPositions)
-                waiting_for_initial_positions = False
+                formatted_algo = formatToAlgo.formatToAlgo(initialPositions)
+                # waiting_for_initial_positions = False
 
                 message: dict = formatted_algo
                 self.rpi_action_queue.put(PiAction(**message))
@@ -200,34 +211,40 @@ class RaspberryPi:
                 waiting_for_initial_positions = True
                 continue
 
-            message: dict = json.loads(msg_str)
+            # message: dict = json.loads(msg_str)
 
-            if message['cat'] == "control":
-                if message['value'] == "start":
-                    # Check API
-                    if not self.check_api():
-                        self.logger.error(
-                            "API is down! Start command aborted.")
-                        self.android_queue.put(AndroidMessage(
-                            'error', "API is down, start command aborted."))
+            # if message['cat'] == "control":
+            #     if message['value'] == "start":
+            #         # Check API
+            
+            if waiting_for_initial_positions:
+                # if not self.check_api():
+                #     self.logger.error(
+                #         "API is down! Start command aborted.")
+                #     self.android_queue.put(AndroidMessage(
+                #         'error', "API is down, start command aborted."))
 
-                    # Commencing path following
-                    if not self.command_queue.empty():
-                        self.logger.info("Gryo reset!")
-                        self.stm_link.send("RS00")
-                        # Main trigger to start movement #
-                        self.unpause.set()
-                        self.logger.info(
-                            "Start command received, starting robot on path!")
-                        self.android_queue.put(AndroidMessage(
-                            'info', 'Starting robot on path!'))
-                        self.android_queue.put(
-                            AndroidMessage('status', 'running'))
-                    else:
-                        self.logger.warning(
-                            "The command queue is empty, please set obstacles.")
-                        self.android_queue.put(AndroidMessage(
-                            "error", "Command queue is empty, did you set obstacles?"))
+                # Commencing path following
+                if not self.command_queue.empty():
+                    # self.logger.info("Gryo reset!")
+                    # self.stm_link.send("RS00")
+                    # Main trigger to start movement #
+
+                    print("testing unpause")
+                    self.unpause.set()
+                    self.logger.info(
+                        "Start command received, starting robot on path!")
+                    # self.android_queue.put(AndroidMessage(
+                    #     'info', 'Starting robot on path!'))
+                    # self.android_queue.put(
+                    #     AndroidMessage('status', 'running'))
+                else:
+                    self.logger.warning(
+                        "The command queue is empty, please set obstacles.")
+                    # self.android_queue.put(AndroidMessage(
+                    #     "error", "Command queue is empty, did you set obstacles?"))
+                    
+                waiting_for_initial_positions = False
 
     def recv_stm(self) -> None:
         """
@@ -307,11 +324,16 @@ class RaspberryPi:
             # Acquire lock first (needed for both moving, and snapping pictures)
             self.movement_lock.acquire()
 
-            command = formatToSTM(command)
+
+            print("Command to format to STM: ", command)
+            command = formatToSTM.formatToSTM(command)
             stm32_prefixes = ("f ", "b ", "fr ", "fl ", "br ", "bl ")
+
+            print("Formatted command to send STM: ", command)
 
             # STM32 Commands - Send straight to STM32
             if command.startswith(stm32_prefixes):
+                print("Command sending to STM32: ", command)
                 self.stm_link.send(command)
                 self.logger.debug(f"Sending to STM32: {command}")
 
@@ -540,6 +562,7 @@ class RaspberryPi:
         # Put commands and paths into respective queues
         self.clear_queues()
         for c in commands:
+            print("Put command in queue: ", c)
             self.command_queue.put(c)
 
         # dont know if needed
