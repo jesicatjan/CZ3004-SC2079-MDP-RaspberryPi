@@ -12,6 +12,7 @@ from consts import SYMBOL_MAP
 from logger import prepare_logger
 from settings import ALGO_API_IP, ALGO_API_PORT
 import formatToSTM
+import formatToAlgo    
 
 class PiAction:
     """
@@ -165,6 +166,10 @@ class RaspberryPi:
         """
         [Child Process] Processes the messages received from Android
         """
+
+        waiting_for_initial_positions = False
+        initialPositions = None
+
         while True:
             msg_str: Optional[str] = None
             try:
@@ -176,16 +181,28 @@ class RaspberryPi:
             if msg_str is None:
                 continue
 
-            message: dict = json.loads(msg_str)
+            if waiting_for_initial_positions:
+                initialPositions = msg_str
+                print(f"initialPositions from android: {initialPositions}")
 
-            ## Command: Set obstacles ##
-            if message['cat'] == "obstacles":
+                # Format and POST request to the algorithm server
+                formatted_algo = formatToAlgo(initialPositions)
+                waiting_for_initial_positions = False
+
+                message: dict = formatted_algo
                 self.rpi_action_queue.put(PiAction(**message))
                 self.logger.debug(
                     f"Set obstacles PiAction added to queue: {message}")
+                continue
 
-            ## Command: Start Moving ##
-            elif message['cat'] == "control":
+            # Check if the message is "BEGIN"
+            if msg_str == "BEGIN":
+                waiting_for_initial_positions = True
+                continue
+
+            message: dict = json.loads(msg_str)
+
+            if message['cat'] == "control":
                 if message['value'] == "start":
                     # Check API
                     if not self.check_api():
