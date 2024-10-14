@@ -6,8 +6,8 @@ from multiprocessing import Process, Manager
 from typing import Optional
 import os
 import requests
-from communication.android import AndroidLink, AndroidMessage
-from communication.stm32 import STMLink
+from android import AndroidLink, AndroidMessage
+from stm32 import STMLink
 from consts import SYMBOL_MAP
 from logger import prepare_logger
 from settings import ALGO_API_IP, ALGO_API_PORT
