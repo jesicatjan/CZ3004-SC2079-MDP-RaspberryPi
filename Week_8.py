@@ -174,7 +174,6 @@ class RaspberryPi:
 
         while True:
             msg_str: Optional[str] = None
-            print("Message from Android: ", msg_str)
 
             # test
             # if test == True:
@@ -183,6 +182,7 @@ class RaspberryPi:
 
             try:
                 msg_str = self.android_link.recv()
+                print("Message from Android: ", msg_str)
             except OSError:
                 self.android_dropped.set()
                 self.logger.debug("Event set: Android connection dropped")
