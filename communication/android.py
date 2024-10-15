@@ -112,7 +112,7 @@ class AndroidLink(Link):
         Initialize the Bluetooth connection.
         """
         super().__init__()
-        self.client_sock = None
+        self.client_socket = None
         self.server_sock = None
 
     def connect(self):
@@ -134,7 +134,7 @@ class AndroidLink(Link):
             self.server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
             self.server_sock.bind((MAC_ADDRESS, PORT_NUMBER))
             self.server_sock.listen(1)
-            print(f"[BT] Listening on {self.MAC_ADDRESS}:{self.PORT_NUMBER}...")
+            print(f"[BT] Listening on {MAC_ADDRESS}:{PORT_NUMBER}...")
 
             # Parameters
             port = self.server_sock.getsockname()[1]
@@ -148,23 +148,23 @@ class AndroidLink(Link):
             print(client_info)
             self.logger.info(
                 f"Awaiting Bluetooth connection on RFCOMM CHANNEL {port}")
-            self.client_sock, client_info = self.server_sock.accept()
+            self.client_socket, client_info = self.server_sock.accept()
             self.logger.info(f"Accepted connection from: {client_info}")
 
         except Exception as e:
             self.logger.error(f"Error in Bluetooth link connection: {e}")
             self.server_sock.close()
-            self.client_sock.close()
+            self.client_socket.close()
 
     def disconnect(self):
         """Disconnect from Android Bluetooth connection and shutdown all the sockets established"""
         try:
             self.logger.debug("Disconnecting Bluetooth link")
             self.server_sock.shutdown(socket.SHUT_RDWR)
-            self.client_sock.shutdown(socket.SHUT_RDWR)
-            self.client_sock.close()
+            self.client_socket.shutdown(socket.SHUT_RDWR)
+            self.client_socket.close()
             self.server_sock.close()
-            self.client_sock = None
+            self.client_socket = None
             self.server_sock = None
             self.logger.info("Disconnected Bluetooth link")
         except Exception as e:
@@ -173,7 +173,7 @@ class AndroidLink(Link):
     def send(self, message: AndroidMessage):
         """Send message to Android"""
         try:
-            self.client_sock.send(f"{message.jsonify}\n".encode("utf-8"))
+            self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
             self.logger.debug(f"Sent to Android: {message.jsonify}")
         except OSError as e:
             self.logger.error(f"Error sending message to Android: {e}")
@@ -182,7 +182,7 @@ class AndroidLink(Link):
     def recv(self) -> Optional[str]:
         """Receive message from Android"""
         try:
-            tmp = self.client_sock.recv(1024)
+            tmp = self.client_socket.recv(1024)
             self.logger.debug(tmp)
             message = tmp.strip().decode("utf-8")
             self.logger.debug(f"Received from Android: {message}")
