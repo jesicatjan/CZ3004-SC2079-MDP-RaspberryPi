@@ -170,16 +170,16 @@ class RaspberryPi:
         waiting_for_initial_positions = False
         initialPositions = None
 
-        test = True
+        # test = True
 
         while True:
             msg_str: Optional[str] = None
             print("Message from Android: ", msg_str)
 
             # test
-            if test == True:
-                waiting_for_initial_positions = True
-                test = False
+            # if test == True:
+            #     waiting_for_initial_positions = True
+            #     test = False
 
             try:
                 msg_str = self.android_link.recv()
@@ -191,8 +191,8 @@ class RaspberryPi:
                 continue
 
             if waiting_for_initial_positions:
-                # initialPositions = msg_str
-                initialPositions = "OBS,1,10,4,NORTH|OBS,2,5,4,NORTH|OBS,3,7,3,NORTH|OBS,4,3,6,NORTH|OBS,5,1,10,NORTH"
+                initialPositions = msg_str
+                # initialPositions = "OBS,1,10,4,NORTH|OBS,2,5,4,NORTH|OBS,3,7,3,NORTH|OBS,4,3,6,NORTH|OBS,5,1,10,NORTH"
                 print(f"initialPositions from android: {initialPositions}")
 
                 # force unpause
@@ -201,7 +201,7 @@ class RaspberryPi:
 
                 # Format and POST request to the algorithm server
                 formatted_algo = formatToAlgo.formatToAlgo(initialPositions)
-                # waiting_for_initial_positions = False
+                waiting_for_initial_positions = False
 
                 message: dict = formatted_algo
                 self.rpi_action_queue.put(PiAction(**message))
