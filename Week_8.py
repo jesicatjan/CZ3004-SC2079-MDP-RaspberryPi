@@ -210,7 +210,7 @@ class RaspberryPi:
                 continue
 
             # Check if the message is "BEGIN"
-            if msg_str == "BEGIN":
+            if "BEGIN" in msg_str:
                 waiting_for_initial_positions = True
                 continue
 
@@ -257,20 +257,23 @@ class RaspberryPi:
 
             message: str = self.stm_link.recv()
 
-            if message.startswith("ACK"):
-                if self.rs_flag == False:
-                    self.rs_flag = True
-                    self.logger.debug("ACK for RS00 from STM32 received.")
-                    continue
+            print("In recv_stm. Message from STM: ", message)
+
+            if message is not None:
+                # if self.rs_flag == False:
+                #     # self.rs_flag = True
+                #     self.logger.debug("ACK for RS00 from STM32 received.")
+                #     continue
+
                 try:
+                    print("Releasing movement lock")
                     self.movement_lock.release()
-                    try:
-                        self.retrylock.release()
-                    except:
-                        pass
+                    self.retrylock.release()
+
                     self.logger.debug(
                         "ACK from STM32 received, movement lock released.")
 
+                except:
                     cur_location = self.path_queue.get_nowait()
 
                     self.current_location['x'] = cur_location['x']
@@ -284,8 +287,8 @@ class RaspberryPi:
                         "d": cur_location['d'],
                     }))
 
-                except Exception:
-                    self.logger.warning("Tried to release a released lock!")
+                # except Exception:
+                #     self.logger.warning("Tried to release a released lock!")
             else:
                 self.logger.warning(
                     f"Ignored unknown message from STM: {message}")
@@ -315,7 +318,7 @@ class RaspberryPi:
             # Retrieve next movement command
             command: str = self.command_queue.get()
             print("current command from queue: ", command)
-            self.logger.debug("wait for unpause")
+            # self.logger.debug("wait for unpause")
             # Wait for unpause event to be true [Main Trigger]
             # try:
             #     print("in try block")
@@ -326,7 +329,7 @@ class RaspberryPi:
             #     print("in try except")
             #     self.logger.debug("wait for unpause")
             #     self.unpause.wait()
-            self.logger.debug("wait for movelock")
+            # self.logger.debug("wait for movelock")
             
             # Acquire lock first (needed for both moving, and snapping pictures)
             self.movement_lock.acquire()
@@ -334,7 +337,7 @@ class RaspberryPi:
 
 
             print("Command to format to STM: ", command)
-            command = formatToSTM.formatToSTM(command)
+            # command = formatToSTM.formatToSTM(command)
             stm32_prefixes = ("f ", "b ", "fr ", "fl ", "br ", "bl ")
 
             print("Formatted command to send STM: ", command)
@@ -408,6 +411,9 @@ class RaspberryPi:
         :param obstacle_id_with_signal: the current obstacle ID followed by underscore followed by signal
         """
         obstacle_id, signal = obstacle_id_with_signal.split("_")
+        print("obsttacle id : ", obstacle_id)
+        print("obsttacle id : ", signal)
+
         self.logger.info(f"Capturing image for obstacle id: {obstacle_id}")
         self.android_queue.put(AndroidMessage(
             "info", f"Capturing image for obstacle id: {obstacle_id}"))
@@ -562,6 +568,13 @@ class RaspberryPi:
         # Parse response
         result = json.loads(response.content)['data']
         commands = result['commands']
+
+        # commands = ["SNAP1_C",
+        #             "SNAP2_L",
+        #             "SNAP3_C",
+        #             "SNAP4_C"
+        #             ]
+
         path = result['path']
 
         # Log commands received
