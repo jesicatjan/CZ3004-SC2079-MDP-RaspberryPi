@@ -1,0 +1,225 @@
+import json
+import os
+import socket
+from typing import Optional
+import bluetooth
+from communication.link import Link
+
+
+class AndroidMessage:
+    """
+    Class for communicating with Android tablet over Bluetooth connection.
+    """
+
+    def __init__(self, cat: str, value: str):
+        """
+        Constructor for AndroidMessage.
+        :param cat: Message category.
+        :param value: Message value.
+        """
+        self._cat = cat
+        self._value = value
+
+    @property
+    def cat(self):
+        """
+        Returns the message category.
+        :return: String representation of the message category.
+        """
+        return self._cat
+
+    @property
+    def value(self):
+        """
+        Returns the message as a string.
+        :return: String representation of the message.
+        """
+        return self._value
+
+    @property
+    def jsonify(self) -> str:
+        """
+        Returns the message as a JSON string.
+        :return: JSON string representation of the message.
+        """
+        return json.dumps({'cat': self._cat, 'value': self._value})
+
+
+class AndroidLink(Link):
+    """Class for communicating with Android tablet over Bluetooth connection. 
+
+    ## General Format
+    Messages between the Android app and Raspi will be in the following format:
+    ```json
+    {"cat": "xxx", "value": "xxx"}
+    ```
+
+    The `cat` (for category) field with the following possible values:
+    - `info`: general messages
+    - `error`: error messages, usually in response of an invalid action
+    - `location`: the current location of the robot (in Path mode)
+    - `image-rec`: image recognition results
+    - `mode`: the current mode of the robot (`manual` or `path`)
+    - `status`: status updates of the robot (`running` or `finished`)
+    - `obstacle`: list of obstacles 
+
+    ## Android to RPi
+
+    #### Set Obstacles
+    The contents of `obstacles` together with the configured turning radius (`settings.py`) will be passed to the Algorithm API.
+    ```json
+    {
+    "cat": "obstacles",
+    "value": {
+        "obstacles": [{"x": 5, "y": 10, "id": 1, "d": 2}],
+        "mode": "0"
+    }
+    }
+    ```
+    RPi will store the received commands and path and make a call to the Algorithm API
+
+    ### Start
+    Signals to the robot to start dispatching the commands (when obstacles were set).
+    ```json
+    {"cat": "control", "value": "start"}
+    ```
+
+    If there are no commands in the queue, the RPi will respond with an error:
+    ```json
+    {"cat": "error", "value": "Command queue is empty, did you set obstacles?"}
+    ```
+
+    ### Image Recognition 
+
+    #### RPi to Android
+    ```json
+    {"cat": "image-rec", "value": {"image_id": "A", "obstacle_id":  "1"}}
+    ```
+
+    ### Location Updates (RPi to Android)
+    In Path mode, the robot will periodically notify Android with the updated location of the robot.
+    ```json
+    {"cat": "location", "value": {"x": 1, "y": 1, "d": 0}}
+    ```
+    where `x`, `y` is the location of the robot, and `d` is its direction.
+
+
+
+    """
+
+    def __init__(self):
+        """
+        Initialize the Bluetooth connection.
+        """
+        super().__init__()
+        self.client_socket = None
+        self.server_socket = None
+
+    def connect(self):
+        """
+        Connect to Andriod by Bluetooth
+        """
+
+        MAC_ADDRESS = 'E4:5F:01:B4:C7:6D'  # Raspberry Pi's MAC address
+        TABLET_BLUETOOTH = '90:EE:C7:E7:D6:40'  # Android tablet Bluetooth MAC address
+        PORT_NUMBER = 1
+        READ_BUFFER_SIZE = 5096
+
+        self.logger.info("Bluetooth connection started")
+        try:
+            # Set up the Bluetooth server socket
+            self.server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+            self.server_socket.bind((MAC_ADDRESS, PORT_NUMBER))
+            self.server_socket.listen(1)
+            print(f"[BT] Listening on {MAC_ADDRESS}:{PORT_NUMBER}...")
+
+            # Accept a connection from the tablet
+            print(f"[BT] Waiting for connection from {TABLET_BLUETOOTH}...")
+            self.client_socket, client_info = self.server_socket.accept()
+            if client_info[0] == self.TABLET_BLUETOOTH:
+                print(f"[BT] Connected to {client_info}")
+            else:
+                print(f"[BT] Connected to an unknown device: {client_info}")
+                self.disconnect()
+        except Exception as e:
+            print(f"[BT] Failed to start Bluetooth server: {e}")
+        '''try:
+            # Set RPi to be discoverable in order for service to be advertisable
+            #os.system("sudo hciconfig hci0 piscan")
+
+            # Initialize server socket
+            self.server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+            self.server_socket.bind((MAC_ADDRESS, PORT_NUMBER))
+            self.server_socket.listen(1)
+            print(f"[BT] Listening on {MAC_ADDRESS}:{PORT_NUMBER}...")
+
+            # Parameters
+            #port = self.server_socket.getsockname()[1]
+            #uuid = '94f39d29-7d6d-437d-973b-fba39e49d4ee'
+
+            # Advertise
+            #bluetooth.advertise_service(self.server_socket, "MDPGrp31",
+                                        #service_id=uuid,
+                                        #service_classes=[uuid,
+                                        #bluetooth.STM_SERIAL_PORT_CLASS],
+                                        #profiles=[bluetooth.STM_SERIAL_PORT_PROFILE])
+
+            #print("here")
+            #print(client_info)
+            #self.logger.info(
+                #f"Awaiting Bluetooth connection on RFCOMM CHANNEL {port}")
+            #self.client_socket, client_info = self.server_socket.accept()
+            #self.logger.info(f"Accepted connection from: {client_info}")
+
+        #except Exception as e:
+            #self.logger.error(f"Error in Bluetooth link connection: {e}")
+            #self.server_socket.close()
+            #self.client_socket.close()
+            
+            # Accept a connection from the tablet
+            print(f"[BT] Waiting for connection from {self.TABLET_BLUETOOTH}...")
+            self.client_socket, client_info = self.server_socket.accept()
+            if client_info[0] == self.TABLET_BLUETOOTH:
+                print(f"[BT] Connected to {client_info}")
+            else:
+                print(f"[BT] Connected to an unknown device: {client_info}")
+                self.disconnect()
+        except Exception as e:
+            print(f"[BT] Failed to start Bluetooth server: {e}")'''
+        
+             
+
+    def disconnect(self):
+        """Disconnect from Android Bluetooth connection and shutdown all the sockets established"""
+        try:
+            self.logger.debug("Disconnecting Bluetooth link")
+            self.server_socket.shutdown(socket.SHUT_RDWR)
+            self.client_socket.shutdown(socket.SHUT_RDWR)
+            self.client_socket.close()
+            self.server_socket.close()
+            self.client_socket = None
+            self.server_socket = None
+            self.logger.info("Disconnected Bluetooth link")
+        except Exception as e:
+            self.logger.error(f"Failed to disconnect Bluetooth link: {e}")
+
+    def send(self, message: AndroidMessage):
+        """Send message to Android"""
+        try:
+            self.client_socket.send(f"{message.jsonify}\n".encode("utf-8"))
+            self.logger.debug(f"Sent to Android: {message.jsonify}")
+        except OSError as e:
+            self.logger.error(f"Error sending message to Android: {e}")
+            raise e
+
+    def recv(self) -> Optional[str]:
+        """Receive message from Android"""
+        try:
+            tmp = self.client_socket.recv(1024)
+            self.logger.debug(tmp)
+            message = tmp.strip().decode("utf-8")
+            self.logger.debug(f"Received from Android: {message}")
+            return message
+        except OSError as e:  # connection broken, try to reconnect
+            self.logger.error(f"Error receiving message from Android: {e}")
+            raise e
