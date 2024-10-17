@@ -339,7 +339,7 @@ class RaspberryPi:
 
             print("Command to format to STM: ", command)
             command = formatToSTM.formatToSTM(command)
-            stm32_prefixes = ("f ", "b ", "fr ", "fl ", "br ", "bl ")
+            stm32_prefixes = ("right", "left", "center")
 
             print("Formatted command to send STM: ", command)
 
