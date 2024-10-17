@@ -315,7 +315,7 @@ class RaspberryPi:
             command: str = self.command_queue.get()
             self.unpause.wait()
             self.movement_lock.acquire()
-            stm32_prefixes = ("STOP", "center", "LEFT", "UL", "UR", "PL", "PR", "RS", "OB")
+            stm32_prefixes = ("STOP", "center", "LEFT", "RIGHT" "UL", "UR", "PL", "PR", "RS", "OB")
             if command.startswith(stm32_prefixes):
                 self.stm_link.send(command)
             elif command == "FIN":
