@@ -1,0 +1,6 @@
+# center,0,forward,100 -> FW100
+# center,0,reverse,100 -> BW100
+# left,90,forward,0 -> FL00
+# right,90,forward,0 -> FR00
+# right,90,reverse,0 -> BR00
+# left,90,reverse,0 -> BL00
