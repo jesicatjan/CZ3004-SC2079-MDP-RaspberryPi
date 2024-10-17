@@ -2,27 +2,34 @@
 # stm32_prefixes = ("FS", "BS", "FW", "BW", "FL", "FR", "BL",
 #                   "BR", "TL", "TR", "A", "C", "DT", "STOP", "ZZ", "RS")
 
+# center,0,forward,100 -> FW100
+# center,0,reverse,100 -> BW100
+# left,90,forward,0 -> FL00
+# right,90,forward,0 -> FR00
+# right,90,reverse,0 -> BR00
+# left,90,reverse,0 -> BL00
+
 def formatToSTM(command):
 
     cmd_type = command[:2]
     value = command[2:]
 
     if cmd_type == "FW":  # Forward
-        return f"f {value},"
+        return f"center,0,forward,{value}"
     elif cmd_type == "BW":  # Backward
-        return f"b {value},"
+        return f"center,0,reverse,{value}"
     elif cmd_type == "FR":  # Forward Right
-        return f"fr 90,"
+        return f"right,90,forward,{value}"
     elif cmd_type == "FL":  # Forward Left
-        return f"fl 90,"
+        return f"left,90,forward,{value}"
     elif cmd_type == "BR":  # Backward Right
-        return f"br 90,"
+        return f"right,90,reverse,{value}"
     elif cmd_type == "BL":  # Backward Left
-        return f"bl 90,"
+        return f"left,90,reverse,{value}"
     else:
         return command
 
-# formatted_result = formatToSTM("un")
+# formatted_result = formatToSTM("FR30")
 # print(formatted_result)
 
 # json_data = {
