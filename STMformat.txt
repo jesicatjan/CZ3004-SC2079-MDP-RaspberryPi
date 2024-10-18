@@ -4,3 +4,28 @@
 # right,90,forward,0 -> FR00
 # right,90,reverse,0 -> BR00
 # left,90,reverse,0 -> BL00
+
+
+
+# >>
+
+# -1,-1,-1,-1 (Get US1 from last parameter of acknowledgement)
+# center,0,forward(US1-35)
+# right,45,forward,0
+# left,45,forward,0
+
+# scan for image
+
+# -1,-1,-1,-1 (Get US2 from last parameter of acknowledgement)
+# center,0,forward,(US2-30)
+# right,90,forward,0
+# r,0,0,0 (command to move forward until detect finish the edge of obstacle 2)
+# left,180,forward,0
+# r,0,0,0 (command to move straight again along the back of obstacle 2, get US3 from the last parameter of the acknowledgement, which is roughly the length of obstacle 2)
+# left,90,forward,0
+
+# center,0,forward,(US1+US2-30)
+# left,90,forward,0
+# center,0,reverse,30
+# center,0,forward,(US3/2)
+# right,90,forward,0
